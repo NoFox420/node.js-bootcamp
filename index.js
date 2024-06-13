@@ -2,6 +2,8 @@ const fs = require('fs');
 const http = require('http');
 const url = require('url');
 
+const slugify = require('slugify');
+
 const replaceTemplate = require('./modules/replaceTemplate');
 
 
@@ -52,6 +54,10 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 
 //takes json code and turns it into js object
 const dataObj = JSON.parse(data);
+
+//editing html params to match product names
+const slugs = dataObj.map(el => slugify(el.productName, {lower: true}));
+console.log(slugs);
 
 //creating server, callback will be executed each time a new request hits server
 const server = http.createServer((req, res) => {
