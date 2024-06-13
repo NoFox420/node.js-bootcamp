@@ -39,15 +39,26 @@ const url = require('url');
 ////////////////////////////////////////
 // SERVER
 
+//only executed once at startup, hence why synchronous is not an issue
+//reading file
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
+//takes json code and turns it into js object
+const dataObj = JSON.parse(data);
+
 //creating server, callback will be executed each time a new request hits server
 const server = http.createServer((req, res) => {
     // ROUTING
     const pathName = req.url;
 
-    if(pathName === '/' || pathName === '/overview') {
+    if (pathName === '/' || pathName === '/overview') {
         res.end('This is the OVERVIEW');
     } else if (pathName === '/product') {
         res.end('This is the PRODUCT');
+    } else if (pathName === '/api') {
+            //telling browser we're sending json
+            res.writeHead(200, {'Content-type': 'application/json'});
+            //end needs to send back string
+            res.end(data);
     } else {
         //sending a html header element to the browser
         res.writeHead(404, {
