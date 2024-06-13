@@ -70,10 +70,11 @@ const dataObj = JSON.parse(data);
 //creating server, callback will be executed each time a new request hits server
 const server = http.createServer((req, res) => {
     // ROUTING
-    const pathName = req.url;
+
+    const {query, pathname} = url.parse(req.url, true);
 
     // OVERVIEW PAGE
-    if (pathName === '/' || pathName === '/overview') {
+    if (pathname === '/' || pathname === '/overview') {
         res.writeHead(200, {'Content-type': 'text/html'});
         //looping over products in dataObj, replacing placeholder in template-card with current product
         //.join() joins all elements of array into a string
@@ -83,11 +84,14 @@ const server = http.createServer((req, res) => {
         res.end(output);
 
     // PRODUCT PAGE
-    } else if (pathName === '/product') {
-        res.end('This is the PRODUCT');
+    } else if (pathname === '/product') {
+        res.writeHead(200, {'Content-type': 'text/html'});
+        const product = dataObj[query.id];
+        const output = replaceTemplate(tempProduct, product);
+        res.end(output);
 
     // API
-    } else if (pathName === '/api') {
+    } else if (pathname === '/api') {
             //telling browser we're sending json
             res.writeHead(200, {'Content-type': 'application/json'});
             //end needs to send back string
