@@ -6,7 +6,6 @@ const slugify = require('slugify');
 
 const replaceTemplate = require('./modules/replaceTemplate');
 
-
 ////////////////////////////////////////
 // FILES
 
@@ -23,7 +22,6 @@ const replaceTemplate = require('./modules/replaceTemplate');
 
 // console.log("Files written!");
 
-
 //Non-Blocking, asynchronous way
 // fs.readFile('./txt/start.txt', 'utf-8', (err, data1) => {
 //     if(err) return console.log("ERROR!");
@@ -39,16 +37,23 @@ const replaceTemplate = require('./modules/replaceTemplate');
 // });
 // console.log("Will read file!");
 
-
 ////////////////////////////////////////
 // SERVER
 
-
 //only executed once at startup, hence why synchronous is not an issue
 //reading file
-const tempOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8');
-const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8');
-const tempProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8');
+const tempOverview = fs.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  'utf-8'
+);
+const tempCard = fs.readFileSync(
+  `${__dirname}/templates/template-card.html`,
+  'utf-8'
+);
+const tempProduct = fs.readFileSync(
+  `${__dirname}/templates/template-product.html`,
+  'utf-8'
+);
 
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 
@@ -56,51 +61,53 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8');
 const dataObj = JSON.parse(data);
 
 //editing html params to match product names
-const slugs = dataObj.map(el => slugify(el.productName, {lower: true}));
+const slugs = dataObj.map((el) => slugify(el.productName, { lower: true }));
 console.log(slugs);
 
 //creating server, callback will be executed each time a new request hits server
 const server = http.createServer((req, res) => {
-    // ROUTING
+  // ROUTING
 
-    const {query, pathname} = url.parse(req.url, true);
+  const { query, pathname } = url.parse(req.url, true);
 
-    // OVERVIEW PAGE
-    if (pathname === '/' || pathname === '/overview') {
-        res.writeHead(200, {'Content-type': 'text/html'});
-        //looping over products in dataObj, replacing placeholder in template-card with current product
-        //.join() joins all elements of array into a string
-        const cardsHtml = dataObj.map(el =>replaceTemplate(tempCard, el)).join('');
+  // OVERVIEW PAGE
+  if (pathname === '/' || pathname === '/overview') {
+    res.writeHead(200, { 'Content-type': 'text/html' });
+    //looping over products in dataObj, replacing placeholder in template-card with current product
+    //.join() joins all elements of array into a string
+    const cardsHtml = dataObj
+      .map((el) => replaceTemplate(tempCard, el))
+      .join('');
 
-        const output = tempOverview.replace('{%PRODUCT_CARDS%}', cardsHtml);
-        res.end(output);
+    const output = tempOverview.replace('{%PRODUCT_CARDS%}', cardsHtml);
+    res.end(output);
 
     // PRODUCT PAGE
-    } else if (pathname === '/product') {
-        res.writeHead(200, {'Content-type': 'text/html'});
-        const product = dataObj[query.id];
-        const output = replaceTemplate(tempProduct, product);
-        res.end(output);
+  } else if (pathname === '/product') {
+    res.writeHead(200, { 'Content-type': 'text/html' });
+    const product = dataObj[query.id];
+    const output = replaceTemplate(tempProduct, product);
+    res.end(output);
 
     // API
-    } else if (pathname === '/api') {
-            //telling browser we're sending json
-            res.writeHead(200, {'Content-type': 'application/json'});
-            //end needs to send back string
-            res.end(data);
+  } else if (pathname === '/api') {
+    //telling browser we're sending json
+    res.writeHead(200, { 'Content-type': 'application/json' });
+    //end needs to send back string
+    res.end(data);
 
     // NOT FOUND
-    } else {
-        //sending a html header element to the browser
-        res.writeHead(404, {
-            'Content-type': 'text/html',
-            'my-own-header': 'hello-world'
-        });
-        res.end('<h1>Page not found!</h1>');
-    }
+  } else {
+    //sending a html header element to the browser
+    res.writeHead(404, {
+      'Content-type': 'text/html',
+      'my-own-header': 'hello-world',
+    });
+    res.end('<h1>Page not found!</h1>');
+  }
 });
 
 //listening for incoming requests on localhost:8000
 server.listen(8000, '127.0.0.1', () => {
-    console.log('Listening to requests on port 8000');
+  console.log('Listening to requests on port 8000');
 });
